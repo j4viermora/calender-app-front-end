@@ -10,7 +10,6 @@ import {
 import { startChecking } from '../actions/auth';
 import { LoginScreen } from '../components/auth/LoginScreen';
 import { CalendarScreen } from '../components/calendar/CalendarScreen';
-import { Loading } from '../components/ui/components/Loading';
 import { PrivateRoutes } from './PrivateRoutes ';
 import { PublicRoutes } from './PublicRoutes';
 
@@ -18,7 +17,7 @@ export const AppRouter = () => {
     
     
 
-    const { checking, uid } = useSelector(state => state.auth)
+    const { uid } = useSelector(state => state.auth)
 
     const dispatch = useDispatch()
 
@@ -28,12 +27,6 @@ export const AppRouter = () => {
 
     }, [ dispatch ] )
    
-
-    if ( checking ) {
-
-        return ( <Loading /> )
-
-    }
 
     return (
         <Router>
