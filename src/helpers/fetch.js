@@ -35,9 +35,10 @@ const fetchWithToken = ( endpoint, data , method = 'GET'  ) => {
             return fetch( url, {
                 method,
                 headers: {
-                    'Content.type': 'application/json',
+                    'Content-type': 'application/json',
                     "x-token": token
-                }, body: JSON.stringify( data ) 
+                }, 
+                body: JSON.stringify( data ) 
             })
        
         };
