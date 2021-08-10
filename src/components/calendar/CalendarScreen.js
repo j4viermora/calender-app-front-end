@@ -11,7 +11,11 @@ import { CalendarModal } from './CalendarModal';
 import { uiOpenModal } from '../../actions/ui';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { eventSetActive, eventClearActiveEvent, eventStartLoading } from '../../actions/events';
+import {
+	eventSetActive,
+	eventClearActiveEvent,
+	eventStartLoading,
+} from '../../actions/events';
 import 'moment/locale/es';
 import { AddNewFab } from '../ui/AddNewFab';
 import { DeleteEventFab } from '../ui/DeleteEventFab';
@@ -21,99 +25,79 @@ moment.locale('es');
 const localizer = momentLocalizer(moment);
 
 export const CalendarScreen = () => {
+	const dispatch = useDispatch();
+	const { events, activeEvent } = useSelector((state) => state.calendar);
+	const { uid } = useSelector((state) => state.auth);
 
+	const [lastView, setLastView] = useState(
+		localStorage.getItem('lastView') || 'month'
+	);
 
-    const dispatch = useDispatch();
-    const { events, activeEvent } = useSelector( state => state.calendar );
-    const { uid } =  useSelector( state => state.auth )
-   
-    const [lastView, setLastView] = useState( localStorage.getItem('lastView') || 'month' );
+	useEffect(() => {
+		dispatch(eventStartLoading());
+	}, [dispatch]);
 
-    useEffect( () => {
+	const onDoubleClick = (e) => {
+		// console.log(e);
+		dispatch(uiOpenModal());
+	};
 
-        dispatch( eventStartLoading() )
+	const onSelectEvent = (e) => {
+		dispatch(eventSetActive(e));
+	};
 
+	const onViewChange = (e) => {
+		setLastView(e);
+		localStorage.setItem('lastView', e);
+	};
 
-    } ,[ dispatch ] )
+	const onSelectSlot = (e) => {
+		// console.log(e)
+		dispatch(eventClearActiveEvent());
+	};
 
+	const eventStyleGetter = (event, start, end, isSelected) => {
+		const style = {
+			backgroundColor: uid === event.user._id ? 'blue' : 'red',
+			borderRadius: '0px',
+			opacity: 0.8,
+			display: 'block',
+			color: 'white',
+		};
 
+		return {
+			style,
+		};
+	};
 
-    const onDoubleClick = (e) => {
-        // console.log(e);
-        dispatch( uiOpenModal() );
-    }
+	return (
+		<>
+			<div className="calendar-screen">
+				<Navbar />
+				<Calendar
+					localizer={localizer}
+					events={events}
+					startAccessor="start"
+					endAccessor="end"
+					messages={messages}
+					eventPropGetter={eventStyleGetter}
+					onDoubleClickEvent={onDoubleClick}
+					onSelectEvent={onSelectEvent}
+					onView={onViewChange}
+					onSelectSlot={onSelectSlot}
+					selectable={true}
+					view={lastView}
+					components={{
+						event: CalendarEvent,
+					}}
+				/>
 
-    const onSelectEvent = (e) => {
-        dispatch( eventSetActive( e ) );
-    }
+				<AddNewFab />
 
-    const onViewChange = (e) => {
-        setLastView(e);
-        localStorage.setItem('lastView', e);
-    }
+				{activeEvent && <DeleteEventFab />}
 
-    const onSelectSlot = (e) => {
-        // console.log(e)
-        dispatch( eventClearActiveEvent() );
-    }
-
-
-    const eventStyleGetter = ( event, start, end, isSelected ) => {
-
-
-         
-
-        const style = {
-            backgroundColor: ( uid === event.user._id ) ? 'blue' : 'red' ,
-            borderRadius: '0px',
-            opacity: 0.8,
-            display: 'block',
-            color: 'white'
-        }
-
-
-        return {
-            style
-        }
-    };
-
-    return (
-        <div className="calendar-screen">
-            <Navbar />
-            
-
-            <Calendar
-                localizer={ localizer }
-                events={ events }
-                startAccessor="start"
-                endAccessor="end"
-                messages={ messages }
-                eventPropGetter={ eventStyleGetter }
-                onDoubleClickEvent={ onDoubleClick }
-                onSelectEvent={ onSelectEvent }
-                onView={ onViewChange }
-                onSelectSlot={ onSelectSlot }
-                selectable={ true }
-                view={ lastView }
-                components={{
-                    event: CalendarEvent
-                }}
-            />
-
-
-
-            <AddNewFab />
-
-
-            {
-                (activeEvent) && <DeleteEventFab />
-            }
-            
-
-            <CalendarModal />
-
-
-
-        </div>
-    )
-}
+				<CalendarModal />
+			</div>
+		</>
+	);
+};
